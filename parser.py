@@ -139,6 +139,4 @@ def parse_uploaded_files(files: list) -> pd.DataFrame:
     """Parse and combine multiple uploaded CSV files."""
     frames = [parse_uploaded_file(uploaded) for uploaded in files]
     combined = pd.concat(frames, ignore_index=True)
-    combined = combined.sort_values("date", ascending=False).reset_index(drop=True)
-    combined = combined.drop_duplicates(subset=["date", "description", "amount"], keep="first")
-    return combined
+    return combined.sort_values("date", ascending=False).reset_index(drop=True)

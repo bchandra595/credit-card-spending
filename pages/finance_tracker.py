@@ -6,10 +6,9 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from categories import enrich_categories
 from filters import FilterAudit, apply_transaction_filters_with_audit
 from merchant_rules import RULES_PATH
-from merchants import finalize_spending
+from merchants import enrich_categories, finalize_spending
 from parser import parse_uploaded_files
 
 st.title("Finance Tracker")
@@ -69,7 +68,6 @@ def load_transactions(
         filtered,
         auto_categorize_unknown=auto_categorize_unknown,
         audit=audit,
-        net_refunds=False,
     )
     return enriched, audit, csv_total
 
@@ -175,7 +173,6 @@ except ValueError as exc:
 pre_enrich = (
     filter_audit.raw_count
     - len(filter_audit.autopay_removed)
-    - len(filter_audit.duplicates_removed)
 )
 st.caption(
     f"CSV column total: **{format_currency(csv_total)}** · "
@@ -185,8 +182,6 @@ st.caption(
 removed_parts = []
 if len(filter_audit.autopay_removed):
     removed_parts.append(f"{len(filter_audit.autopay_removed)} autopay")
-if len(filter_audit.duplicates_removed):
-    removed_parts.append(f"{len(filter_audit.duplicates_removed)} duplicates")
 if len(filter_audit.junk_removed):
     removed_parts.append(f"{len(filter_audit.junk_removed)} junk")
 
@@ -194,7 +189,6 @@ if removed_parts:
     with st.expander(f"Removed or adjusted ({', '.join(removed_parts)})", expanded=False):
         sections = [
             ("Autopay payments", filter_audit.autopay_removed),
-            ("Duplicate rows", filter_audit.duplicates_removed),
             ("Unparseable junk", filter_audit.junk_removed),
         ]
         for title, frame in sections:

@@ -1,4 +1,4 @@
-# Publishing the Spending Analyzer
+# Publishing the Finance Tracker
 
 ## Privacy before you deploy
 
@@ -6,7 +6,7 @@ This app processes **financial statements**. If you publish a public URL:
 
 - Users' PDF/CSV data will be processed on **whatever server hosts the app**
 - For a **public** deployment, add authentication and use HTTPS
-- Keep **online merchant lookup off by default** (already the default) so merchant names are not sent to DuckDuckGo unless the user opts in
+- Online merchant lookup is **on by default** in Finance Tracker; users can turn it off in the sidebar
 - Never commit `.cache/`, uploaded files, or API secrets to Git
 
 **Local use (current setup):** everything stays on your computer. No statement data is sent to the internet unless online lookup is enabled.
@@ -102,9 +102,10 @@ Deploy the image to Railway, Fly.io, AWS ECS, Google Cloud Run, etc.
 
 ## Multi-page app entry
 
-Streamlit discovers:
-- `app.py` — Spending Analyzer (home)
-- `pages/1_PDF_to_CSV.py` — PDF converter
+`app.py` uses `st.navigation` with two pages:
+
+- `pages/pdf_to_csv.py` — PDF converter (default)
+- `pages/finance_tracker.py` — spending analysis
 
 Both deploy together when `app.py` is the main file.
 

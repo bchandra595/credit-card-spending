@@ -8,18 +8,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from csv_format import STANDARD_COLUMNS, normalized_to_standard, standard_to_csv_bytes
+from csv_format import STANDARD_COLUMNS, standard_to_csv_bytes
 from filters import apply_transaction_filters
-from pdf_parser import extract_pdf_debug_text, parse_statement_pdf
-
-
-class _BytesUpload:
-    def __init__(self, name: str, data: bytes):
-        self.name = name
-        self._data = data
-
-    def getvalue(self) -> bytes:
-        return self._data
+from pdf_parser import parse_statement_pdf
 
 
 def extract_pdfs(pdf_files: list) -> pd.DataFrame:

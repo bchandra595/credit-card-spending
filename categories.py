@@ -56,10 +56,3 @@ def categorize_description(description: str) -> str:
             if keyword in text:
                 return category
     return "Other"
-
-
-def enrich_categories(df: pd.DataFrame, **kwargs) -> pd.DataFrame:
-    """Backward-compatible entry point — delegates to merchants.enrich_categories."""
-    from merchants import enrich_categories as enrich_with_merchants
-
-    return enrich_with_merchants(df, **kwargs)

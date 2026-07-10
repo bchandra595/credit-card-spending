@@ -20,7 +20,7 @@ streamlit run app.py
 Use the sidebar to switch between:
 
 1. **PDF to CSV** — upload PDF statements, preview extraction, download CSV
-2. **Spending Analyzer** (home) — upload CSV files and view charts
+2. **Finance Tracker** — upload CSV files and view charts
 
 ## CLI: PDF to CSV
 
@@ -41,15 +41,23 @@ Files produced by **PDF to CSV** use these columns:
 | Amount | Positive for charges, negative for payments |
 | Source File | Original PDF filename |
 
-The spending analyzer accepts this format plus native bank CSV exports.
+Finance Tracker accepts this format plus native bank CSV exports.
 
 ## Project layout
 
 | File | Purpose |
 |------|---------|
-| `pages/1_PDF_to_CSV.py` | PDF upload UI |
-| `app.py` | Spending charts (CSV only) |
+| `app.py` | Streamlit navigation entry |
+| `pages/pdf_to_csv.py` | PDF upload UI |
+| `pages/finance_tracker.py` | Spending charts and filters |
 | `pdf_to_csv.py` | PDF extraction + CLI |
 | `pdf_parser.py` | PDF parsing logic |
-| `parser.py` | CSV import for spending app |
+| `amex_parser.py` | Amex-specific PDF layout |
+| `parser.py` | CSV import |
 | `csv_format.py` | Shared CSV schema |
+| `filters.py` | Cleaning, autopay removal, refund pairing |
+| `merchants.py` | Merchant resolution and categories |
+| `merchant_cleaner.py` | Brand/name normalization |
+| `merchant_lookup.py` | Optional online categorization |
+| `merchant_rules.py` | User overrides (`.cache/merchant_rules.json`) |
+| `categories.py` | Keyword and bank-label categories |

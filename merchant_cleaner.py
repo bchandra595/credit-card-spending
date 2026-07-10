@@ -268,8 +268,3 @@ def is_junk_merchant(merchant: str, description: str) -> bool:
     if name.lower() in {"na pa", "na", "pa", "wa", "ar", "fl", "usa", "the", "tst"}:
         return True
     return False
-
-
-def merchant_category_hint(description: str) -> str | None:
-    brand = resolve_brand(description)
-    return brand[1] if brand else None

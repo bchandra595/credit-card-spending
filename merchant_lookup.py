@@ -82,19 +82,12 @@ def _canonical_from_search(merchant: str, results: list[dict[str, str]]) -> str:
 
 
 def _search_web(query: str) -> tuple[str, list[dict[str, str]]]:
-    results: list[dict[str, str]] = []
     try:
         from ddgs import DDGS
 
         results = DDGS().text(query, max_results=5)
     except Exception:
-        try:
-            from duckduckgo_search import DDGS
-
-            with DDGS() as ddgs:
-                results = list(ddgs.text(query, max_results=5))
-        except Exception:
-            return "", []
+        return "", []
 
     if not results:
         return "", []

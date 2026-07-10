@@ -21,7 +21,6 @@ AUTOPAY_PATTERNS = (
 class FilterAudit:
     raw_count: int = 0
     autopay_removed: pd.DataFrame = field(default_factory=pd.DataFrame)
-    duplicates_removed: pd.DataFrame = field(default_factory=pd.DataFrame)
     junk_removed: pd.DataFrame = field(default_factory=pd.DataFrame)
     refunds_absorbed: pd.DataFrame = field(default_factory=pd.DataFrame)
     fully_refunded: pd.DataFrame = field(default_factory=pd.DataFrame)
@@ -30,7 +29,6 @@ class FilterAudit:
     def removed_count(self) -> int:
         return (
             len(self.autopay_removed)
-            + len(self.duplicates_removed)
             + len(self.junk_removed)
             + len(self.refunds_absorbed)
             + len(self.fully_refunded)
@@ -53,16 +51,7 @@ def _is_autopay(description: str) -> bool:
     return any(pattern in lowered for pattern in AUTOPAY_PATTERNS)
 
 
-def remove_autopay(df: pd.DataFrame) -> pd.DataFrame:
-    mask = df["description"].map(_is_autopay)
-    return df[~mask].reset_index(drop=True)
-
-
-def net_partial_refunds(
-    df: pd.DataFrame,
-    *,
-    merchant_col: str = "merchant",
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def net_partial_refunds(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Remove charge/credit rows whose amounts match exactly (ignores merchant name).
     """
@@ -108,7 +97,7 @@ def net_partial_refunds(
             {
                 "date": debit_row["date"],
                 "description": debit_row["description"],
-                "merchant": debit_row.get(merchant_col, ""),
+                "merchant": debit_row.get("merchant", ""),
                 "amount": debit_row["amount"],
                 "reason": pair_reason,
             }
@@ -117,7 +106,7 @@ def net_partial_refunds(
             {
                 "date": row["date"],
                 "description": row["description"],
-                "merchant": row.get(merchant_col, ""),
+                "merchant": row.get("merchant", ""),
                 "amount": row["amount"],
                 "reason": pair_reason,
             }
@@ -132,9 +121,8 @@ def net_partial_refunds(
 
 def apply_transaction_filters(df: pd.DataFrame) -> pd.DataFrame:
     """Light pre-processing before merchant resolution."""
-    result = clean_descriptions(df)
-    result = remove_autopay(result)
-    return result.reset_index(drop=True)
+    result, _ = apply_transaction_filters_with_audit(df)
+    return result
 
 
 def apply_transaction_filters_with_audit(df: pd.DataFrame) -> tuple[pd.DataFrame, FilterAudit]:
@@ -144,9 +132,5 @@ def apply_transaction_filters_with_audit(df: pd.DataFrame) -> tuple[pd.DataFrame
     autopay_mask = result["description"].map(_is_autopay)
     audit.autopay_removed = result[autopay_mask].copy()
     result = result[~autopay_mask]
-
-    dup_mask = result.duplicated(subset=["date", "description", "amount"], keep="first")
-    audit.duplicates_removed = result[dup_mask].copy()
-    result = result[~dup_mask]
 
     return result.reset_index(drop=True), audit

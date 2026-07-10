@@ -267,5 +267,4 @@ def extract_amex_transactions(doc: fitz.Document, source_name: str) -> pd.DataFr
         return None
 
     df = pd.DataFrame(all_rows)
-    df = df.drop_duplicates(subset=["date", "description", "amount"], keep="first")
     return df

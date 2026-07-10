@@ -9,7 +9,6 @@ from merchant_cleaner import (
     canonicalize_merchant,
     clean_merchant_name,
     is_junk_merchant,
-    merchant_category_hint,
     resolve_brand,
 )
 from merchant_lookup import MerchantLookupCache
@@ -41,9 +40,6 @@ def resolve_merchants(descriptions: pd.Series) -> tuple[pd.Series, pd.Series]:
         if category is None and hinted:
             category = hinted
 
-        if category is None:
-            category = merchant_category_hint(description)
-
         merchants.append(merchant)
         categories.append(category)
 
@@ -70,25 +66,13 @@ def enrich_categories(
     df: pd.DataFrame,
     *,
     auto_categorize_unknown: bool = False,
-    use_online_lookup: bool = False,
     audit: FilterAudit | None = None,
-    net_refunds: bool = False,
 ) -> pd.DataFrame:
     from categories import _normalize_bank_category, categorize_description
-
-    if use_online_lookup:
-        auto_categorize_unknown = True
 
     ensure_rules_file()
     result = df.copy()
     result["merchant"], lookup_categories = resolve_merchants(result["description"])
-
-    if net_refunds:
-        result, absorbed, fully_refunded = net_partial_refunds(result)
-        if audit is not None:
-            audit.refunds_absorbed = absorbed
-            audit.fully_refunded = fully_refunded
-        result["merchant"], lookup_categories = resolve_merchants(result["description"])
 
     bank_categories = result["category"].fillna("").astype(str).map(_normalize_bank_category)
     inferred = result.apply(

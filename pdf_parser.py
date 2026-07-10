@@ -333,7 +333,6 @@ def parse_statement_pdf(content: bytes, source_name: str) -> pd.DataFrame:
             )
 
         combined = pd.concat(candidates, ignore_index=True)
-        combined = combined.drop_duplicates(subset=["date", "description", "amount"], keep="first")
         if combined.empty:
             raise ValueError(f"No valid transactions found in PDF '{source_name}'.")
         return combined
